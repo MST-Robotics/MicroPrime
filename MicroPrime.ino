@@ -23,6 +23,11 @@ bool servo1Forward = true;
 bool servo2Forward = true;
 bool servo3Forward = true;
 
+//constant servo offsets angle from the front of Robot
+const int servo1Offset = 0;
+const int servo2Offset = 120;
+const int servo3Offset = 240;
+
 //Pins that all servos are attached to
 const int servoSpeed1Pin = 22; //Servo in the FRONT of robot
 const int servoSpeed2Pin = 24; //Servo on the BACK Drivers Side
@@ -32,12 +37,12 @@ const int servoTurn2Pin = 25; //Servo on the BACK Drivers Side
 const int servoTurn3Pin = 27; //Servo on the BACK Passenger Side
 
 //Set all Pins to starting values
-int currentPositionSpeed1 = 0;
-int currentPositionSpeed2 = 0;
-int currentPositionSpeed3 = 0;
-int currentPositionTurn1 = 90;
-int currentPositionTurn2 = 90;
-int currentPositionTurn3 = 90;
+int currentSpeedServo1 = 0;
+int currentSpeedServo2 = 0;
+int currentSpeedServo3 = 0;
+int currentPositionServo1 = 90;
+int currentPositionServo2 = 90;
+int currentPositionServo3 = 90;
 
 //Other Variables
 const float pi = 3.1415936; // Define pi for radians conversion
@@ -45,6 +50,13 @@ int speedFactor = 0; //value of left Joystick y axis
 float xValue = 0; //value of Right Joystick x axis
 float yValue = 0; //value of Right Joystick y axis
 float desiredHeading; //The angle I want the robot to go 0-360 degrees
+
+//Function to take in the headign and offset and return a servo value
+//Description: Takes the desired Heading and scales it to the proper 
+//              Servo angles and direction
+//Pre: Must have the servo offset, and the joystick heading
+//Post:returns a value of 0-180 degrees, and a direction for the wheel
+int angleCalc(float desiredHeading, int offset, bool & wheelDirection);
 
 void setup()
 {
@@ -61,12 +73,12 @@ void setup()
   servoTurn3.attach(servoTurn3Pin);
   
  //Set all Servos start position 
-  servoSpeed1.writeMicroseconds(1500 + currentPositionSpeed1);
-  servoTurn1.write(currentPositionTurn1);
-  servoSpeed2.writeMicroseconds(1500 + currentPositionSpeed2);
-  servoTurn2.write(currentPositionTurn2);
-  servoSpeed3.writeMicroseconds(1500 + currentPositionSpeed3);
-  servoTurn3.write(currentPositionTurn3);
+  servoSpeed1.writeMicroseconds(1500 + currentSpeedServo1);
+  servoTurn1.write(currentPositionServo1);
+  servoSpeed2.writeMicroseconds(1500 + currentSpeedServo2);
+  servoTurn2.write(currentPositionServo2);
+  servoSpeed3.writeMicroseconds(1500 + currentSpeedServo3);
+  servoTurn3.write(currentPositionServo3);
   
   //Wait for the usb device, xbox controller, to be connected
   if (Usb.Init() == -1) {
@@ -105,9 +117,9 @@ void loop()
       else
       {
         //If no signal is recieved then dont move
-        currentPositionSpeed1 = 0;
-        currentPositionSpeed2 = 0;
-        currentPositionSpeed3 = 0;
+        currentSpeedServo1 = 0;
+        currentSpeedServo2 = 0;
+        currentSpeedServo3 = 0;
       }
       
       if(Xbox.getAnalogHat(RightHatX, 0) > 7500 || 
@@ -166,92 +178,133 @@ void loop()
         Serial.print('\t');
         */
       
- //Map Servo angles for each servo indipendantly
-  
-       
+      //Map Servo angles for each servo indipendantly
+      currentPositionServo1 = 
+              angleCalc(desiredHeading, servo1Offset, servo1Forward);
+      currentPositionServo2 = 
+              angleCalc(desiredHeading, servo2Offset, servo2Forward);
+      currentPositionServo3 = 
+              angleCalc(desiredHeading, servo3Offset, servo3Forward);
+      
       }
       else
       {
         servo1Forward = true;
         servo2Forward = true;
         servo3Forward = true;
-        currentPositionTurn1 = 90;
-        currentPositionTurn2 = 90;
-        currentPositionTurn3 = 90;  
+        currentPositionServo1 = 90;
+        currentPositionServo2 = 90;
+        currentPositionServo3 = 90;  
       }
        
       //Takes the value of directional   
       //Set direction and speed for servo 1
       if(servo1Forward)  
-        currentPositionSpeed1 = speedFactor;
+        currentSpeedServo1 = speedFactor;
       else
-        currentPositionSpeed1 = -speedFactor;
+        currentSpeedServo1 = -speedFactor;
       //Set direction and speed for servo 2
       if(servo2Forward)  
-        currentPositionSpeed2 = speedFactor;
+        currentSpeedServo2 = speedFactor;
       else
-        currentPositionSpeed2 = -speedFactor; 
+        currentSpeedServo2 = -speedFactor; 
       //Set direction and speed for servo 3
       if(servo3Forward)  
-        currentPositionSpeed3 = speedFactor;
+        currentSpeedServo3 = speedFactor;
       else
-        currentPositionSpeed3 = -speedFactor; 
+        currentSpeedServo3 = -speedFactor; 
         
 //Prints the desired speed for each servo out to the serial monitor
         /*
         //Servo 1
         Serial.print("Servo 1: Speed = ");
-        Serial.print(currentPositionSpeed1);
+        Serial.print(currentSpeedServo1);
         Serial.print("  ");
         Serial.print("Direction = ");
-        Serial.print(currentPositionTurn1);
+        Serial.print(currentPositionServo1);
         Serial.print('\t');
         //Servo 2
         Serial.print("Servo 2: Speed = ");
-        Serial.print(currentPositionSpeed2);
+        Serial.print(currentSpeedServo2);
         Serial.print("  ");
         Serial.print("Direction = ");
-        Serial.print(currentPositionTurn2);
+        Serial.print(currentPositionServo2);
         Serial.print('\t');
         //Servo 3
         Serial.print("Servo 3: Speed = ");
-        Serial.print(currentPositionSpeed3);
+        Serial.print(currentSpeedServo3);
         Serial.print("  ");
         Serial.print("Direction = ");
-        Serial.print(currentPositionTurn3);
+        Serial.print(currentPositionServo3);
         Serial.print('\t');
         //proper formating
         Serial.Print('\n');
         */
       
       //Give the turning servos their values and then go
-      servoTurn1.write(currentPositionTurn1);
-      servoTurn2.write(currentPositionTurn2);
-      servoTurn3.write(currentPositionTurn3);
+      servoTurn1.write(currentPositionServo1);
+      servoTurn2.write(currentPositionServo2);
+      servoTurn3.write(currentPositionServo3);
        
       //Give the speed servos their values, and then go 
-      servoSpeed1.writeMicroseconds(1500 + currentPositionSpeed1);
-      servoSpeed2.writeMicroseconds(1500 + currentPositionSpeed2);
-      servoSpeed3.writeMicroseconds(1500 + currentPositionSpeed3);
+      servoSpeed1.writeMicroseconds(1500 + currentSpeedServo1);
+      servoSpeed2.writeMicroseconds(1500 + currentSpeedServo2);
+      servoSpeed3.writeMicroseconds(1500 + currentSpeedServo3);
     }
     
     //Exicute if no command is given from the xbox controller
     else
     {
-      currentPositionTurn1 = 90;
-      currentPositionTurn2 = 90;
-      currentPositionTurn3 = 90;
-      currentPositionSpeed1 = 0;
-      currentPositionSpeed2 = 0;
-      currentPositionSpeed3 = 0;
+      currentPositionServo1 = 90;
+      currentPositionServo2 = 90;
+      currentPositionServo3 = 90;
+      currentSpeedServo1 = 0;
+      currentSpeedServo2 = 0;
+      currentSpeedServo3 = 0;
           
-      servoTurn1.write(currentPositionTurn1);
-      servoTurn2.write(currentPositionTurn2);
-      servoTurn3.write(currentPositionTurn3);
+      servoTurn1.write(currentPositionServo1);
+      servoTurn2.write(currentPositionServo2);
+      servoTurn3.write(currentPositionServo3);
          
-      servoSpeed1.writeMicroseconds(1500 + currentPositionSpeed1);
-      servoSpeed2.writeMicroseconds(1500 + currentPositionSpeed2);
-      servoSpeed3.writeMicroseconds(1500 + currentPositionSpeed3);
+      servoSpeed1.writeMicroseconds(1500 + currentSpeedServo1);
+      servoSpeed2.writeMicroseconds(1500 + currentSpeedServo2);
+      servoSpeed3.writeMicroseconds(1500 + currentSpeedServo3);
     }
   }
+}
+
+
+//Function to take in the headign and offset and return a servo value
+int angleCalc(float desiredHeading, int offset, bool & wheelDirection)
+{
+  //Value to return to the program
+  int servoAngle;
+  
+  //Heading after being adjusted based on offset
+  int adjustedHeading;
+  
+  //Scale the desired Heading to the offset
+  adjustedHeading = (desiredHeading - offset);
+  if(adjustedHeading < 0)
+  {
+    adjustedHeading += 360;
+  }
+  
+  if(adjustedHeading >= 90 && adjustedHeading < 270)
+  {
+    servoAngle = adjustedHeading - 90;
+    wheelDirection = true;
+  }
+  else if(adjustedHeading >= 270)
+  {
+    servoAngle = adjustedHeading - 270;
+    wheelDirection = false;
+  }
+  else
+  {
+    servoAngle = adjustedHeading + 90;
+    wheelDirection = false;
+  }
+ 
+  return servoAngle; 
 }
