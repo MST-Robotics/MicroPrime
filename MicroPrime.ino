@@ -11,12 +11,11 @@ XBOXRECV Xbox(&Usb);
 
 //Declare my servos
 Servo servoSpeed1; //Front
-Servo servoSpeed2; //Back Left - Drivers Side
-Servo servoSpeed3; //Back Right - Passengers Side
+Servo servoSpeed2; //Back Right - Passengers Side
+Servo servoSpeed3; //Back Left - Drivers Side
 Servo servoTurn1; //Front
-Servo servoTurn2; //Back Left - Drivers Side
-Servo servoTurn3; //Back Right - Passengers Side
-
+Servo servoTurn2; //Back Left - Passengers Side
+Servo servoTurn3; //Back Right - Drivers Side
 //Constants used to determine which direction the servos will spin
 //Clockwise = Forward = True; Counterclockwise = Backwards = false
 bool servo1Forward = true;
@@ -84,8 +83,8 @@ void setup()
   if (Usb.Init() == -1) {
     while (1); //halt
   }
-  //wait for the serial monitor to connect
-//while (!Serial);
+//wait for the serial monitor to connect
+  //while (!Serial);
 }
 
 void loop()
@@ -117,9 +116,7 @@ void loop()
       else
       {
         //If no signal is recieved then dont move
-        currentSpeedServo1 = 0;
-        currentSpeedServo2 = 0;
-        currentSpeedServo3 = 0;
+        speedFactor = 0;
       }
       
       if(Xbox.getAnalogHat(RightHatX, 0) > 7500 || 
@@ -176,7 +173,7 @@ void loop()
         Serial.print("Heading: ");
         Serial.print(desiredHeading);
         Serial.print('\t');
-        */
+        //*/
       
       //Map Servo angles for each servo indipendantly
       currentPositionServo1 = 
@@ -238,8 +235,8 @@ void loop()
         Serial.print(currentPositionServo3);
         Serial.print('\t');
         //proper formating
-        Serial.Print('\n');
-        */
+        Serial.print('\n');
+        //*/
       
       //Give the turning servos their values and then go
       servoTurn1.write(currentPositionServo1);
@@ -293,18 +290,20 @@ int angleCalc(float desiredHeading, int offset, bool & wheelDirection)
   if(adjustedHeading >= 90 && adjustedHeading < 270)
   {
     servoAngle = adjustedHeading - 90;
-    wheelDirection = true;
+    wheelDirection = false;
   }
   else if(adjustedHeading >= 270)
   {
     servoAngle = adjustedHeading - 270;
-    wheelDirection = false;
+    wheelDirection = true;
   }
   else
   {
     servoAngle = adjustedHeading + 90;
-    wheelDirection = false;
+    wheelDirection = true;
   }
+ 
+  servoAngle = map(servoAngle, 0, 180, 180, 0);
  
   return servoAngle; 
 }
