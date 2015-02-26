@@ -49,6 +49,7 @@ int speedFactor = 0; //value of left Joystick y axis
 float xValue = 0; //value of Right Joystick x axis
 float yValue = 0; //value of Right Joystick y axis
 float desiredHeading; //The angle I want the robot to go 0-360 degrees
+int speedScale = 0; //The value ranging from 0-10
 
 //Function to take in the headign and offset and return a servo value
 //Description: Takes the desired Heading and scales it to the proper 
@@ -107,11 +108,14 @@ void loop()
         //Set the speed Factor to that of the y axis
         speedFactor = Xbox.getAnalogHat(LeftHatY, 0);
         
-        //Scale values to a range of -500 to 500    
+        //Scale values to a range of -100 to 100
+        //to be multiplied by the speed constant    
         if ( speedFactor > 0)
-          speedFactor = map(speedFactor, 7500, 32767, 0, 500);
+          speedFactor = map(speedFactor, 7500, 32767, 0, 25);
         else
-          speedFactor = map(speedFactor, -32767, -7500, -500, 0);
+          speedFactor = map(speedFactor, -32767, -7500, -25, 0);
+        
+        speedFactor *= speedScale;  
       }
       else
       {
@@ -266,6 +270,58 @@ void loop()
       servoSpeed1.writeMicroseconds(1500 + currentSpeedServo1);
       servoSpeed2.writeMicroseconds(1500 + currentSpeedServo2);
       servoSpeed3.writeMicroseconds(1500 + currentSpeedServo3);
+    }
+    
+    if(Xbox.getButtonClick(L1, 0))
+    {
+      if(speedScale > 0)
+      {
+        speedScale--;
+      }
+    }
+    if(Xbox.getButtonClick(R1, 0))
+    {
+      if(speedScale < 20)
+      {
+        speedScale++;
+      }
+    }
+    
+    switch(speedScale)
+    {
+      case 20:
+        Xbox.setLedMode(ALTERNATING, 0);
+        break;
+      case 19:
+      case 18:
+      case 17:
+      case 16:
+        Xbox.setLedOn(LED4, 0);
+        break;
+      case 15:
+      case 14:
+      case 13:
+      case 12:
+      case 11:
+        Xbox.setLedOn(LED3, 0);
+        break;
+      case 10:
+      case 9:
+      case 8:
+      case 7:
+      case 6:
+        Xbox.setLedOn(LED2, 0);
+        break;
+      case 5:
+      case 4:
+      case 3:
+      case 2:
+      case 1:
+        Xbox.setLedOn(LED1, 0);
+        break;
+      case 0:
+        Xbox.setLedBlink(ALL, 0);
+        break;
     }
   }
 }
