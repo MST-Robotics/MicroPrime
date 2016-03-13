@@ -28,12 +28,12 @@ const int servo2Offset = 120;
 const int servo3Offset = 240;
 
 //Pins that all servos are attached to
-const int servoSpeed1Pin = 22; //Servo in the FRONT of robot
-const int servoSpeed2Pin = 24; //Servo on the BACK Drivers Side
-const int servoSpeed3Pin = 26; //Servo on the BACK Passenger Side
-const int servoTurn1Pin = 23; //Servo in the FRONT of robot
-const int servoTurn2Pin = 25; //Servo on the BACK Drivers Side
-const int servoTurn3Pin = 27; //Servo on the BACK Passenger Side
+const int servoSpeed1Pin = 23; //Servo in the FRONT of robot
+const int servoSpeed2Pin = 25; //Servo on the BACK Drivers Side
+const int servoSpeed3Pin = 27; //Servo on the BACK Passenger Side
+const int servoTurn1Pin = 22; //Servo in the FRONT of robot
+const int servoTurn2Pin = 24; //Servo on the BACK Drivers Side
+const int servoTurn3Pin = 26; //Servo on the BACK Passenger Side
 
 //Set all Pins to starting values
 int currentSpeedServo1 = 0;
@@ -111,9 +111,9 @@ void loop()
         //Scale values to a range of -100 to 100
         //to be multiplied by the speed constant    
         if ( speedFactor > 0)
-          speedFactor = map(speedFactor, 7500, 32767, 0, 25);
+          speedFactor = map(speedFactor, 7500, 32767, 0, 100);
         else
-          speedFactor = map(speedFactor, -32767, -7500, -25, 0);
+          speedFactor = map(speedFactor, -32767, -7500, -100, 0);
         
         speedFactor *= speedScale;  
       }
@@ -281,7 +281,7 @@ void loop()
     }
     if(Xbox.getButtonClick(R1, 0))
     {
-      if(speedScale < 20)
+      if(speedScale < 5)
       {
         speedScale++;
       }
@@ -289,38 +289,23 @@ void loop()
     
     switch(speedScale)
     {
-      case 20:
-        Xbox.setLedMode(ALTERNATING, 0);
+      case 5:
+        Xbox.setLedBlink(ALL, 0);
         break;
-      case 19:
-      case 18:
-      case 17:
-      case 16:
+      case 4:
         Xbox.setLedOn(LED4, 0);
         break;
-      case 15:
-      case 14:
-      case 13:
-      case 12:
-      case 11:
+      case 3:
         Xbox.setLedOn(LED3, 0);
         break;
-      case 10:
-      case 9:
-      case 8:
-      case 7:
-      case 6:
+      case 2:
         Xbox.setLedOn(LED2, 0);
         break;
-      case 5:
-      case 4:
-      case 3:
-      case 2:
       case 1:
         Xbox.setLedOn(LED1, 0);
         break;
       case 0:
-        Xbox.setLedBlink(ALL, 0);
+        Xbox.setLedMode(ALTERNATING, 0);
         break;
     }
   }
